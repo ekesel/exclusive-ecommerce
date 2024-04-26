@@ -1,12 +1,10 @@
-import os
-import sys
+import sys, os
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
 from django.core.wsgi import get_wsgi_application
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-sys.path.append(BASE_DIR)
-
-os.environ["DJANGO_SETTINGS_MODULE"] = "exclusive.settings"
+os.environ['DJANGO_SETTINGS_MODULE'] = 'exclusive.settings'
 application = get_wsgi_application()
 
 from api.models import Category, subCategory
@@ -52,7 +50,8 @@ def populate_sub_categories():
         if subCategory.objects.filter(name=cat).exists():
             continue
         else:
-            subCategory.objects.create(name=cat)
+            cati = Category.objects.get(name="Electronics")
+            subCategory.objects.create(name=cat, category=cati)
             count += 1
     print("NEWLY CREATED")
     print(count)
@@ -61,3 +60,6 @@ def populate_sub_categories():
 def main():
     populate_overall_categories()
     populate_sub_categories()
+
+if __name__ == "__main__":
+    main()

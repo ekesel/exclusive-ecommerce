@@ -25,13 +25,14 @@ class TimeStamped(models.Model):
 
 class Category(models.Model):
     name = models.CharField(max_length=100,unique=True)
+    image_url = models.CharField(max_length=500, null=True)
 
     def __str__(self):
         return self.name
     
 class subCategory(models.Model):
     name = models.CharField(max_length=100,unique=True)
-    image = models.ImageField()
+    image_url = models.CharField(max_length=500, null=True)
     category = models.ForeignKey(Category, related_name='sub_categories', on_delete=models.PROTECT)
 
     def __str__(self):
@@ -40,10 +41,12 @@ class subCategory(models.Model):
     
 class Product(TimeStamped):
     name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=20, decimal_places=4, null=True, default=Decimal("0"))
-    discounted_price = models.DecimalField(max_digits=20, decimal_places=4, null=True, default=Decimal("0"))
+    price = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=Decimal("0"))
+    discounted_price = models.DecimalField(max_digits=20, decimal_places=2, null=True, default=Decimal("0"))
     sub_category = models.ForeignKey(subCategory, related_name='prod_sub_categories', on_delete=models.PROTECT)
     product_desc = models.CharField(max_length=10000)
+    flash_sale = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name
@@ -66,7 +69,8 @@ class PincodeProductAvailability(models.Model):
     avialability = models.BooleanField(default=True)
 
 class ProductImages(models.Model):
-    image = models.ImageField()
+    image_url = models.CharField(max_length=500, null=True)
+    display_image = models.BooleanField(default=True)
     product = models.ForeignKey(Product, related_name="product_images", on_delete=models.PROTECT)
 
     def __str__(self):
