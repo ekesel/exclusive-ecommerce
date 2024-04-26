@@ -87,10 +87,10 @@ class Rating(TimeStamped):
 class CustomerDetail(TimeStamped):
     user = models.OneToOneField(User, related_name="customer_detail", null=True, blank=True, on_delete=models.PROTECT)
     subscribed = models.BooleanField(default=False)
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.CharField(max_length=50)
-    address = models.CharField(max_length=500)
+    first_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
+    address = models.CharField(max_length=500, null=True)
+    phone = models.CharField(max_length=50, null=True)
 
 
 class Order(TimeStamped):

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'constance',
     'constance.backends.database',
+    'rest_framework.authtoken',
     'corsheaders',
     'api'
 ]
@@ -262,4 +263,12 @@ CONSTANCE_CONFIG_FIELDSETS = {
                  'ACHIEVEMENT_3', 'ACHIEVEMENT_4', 'EMPLOYEES', ),
     'CONTACT_US': ('CALL_US_TITLE', 'CALL_US_DESC', 'CALL_US_PHONE', 'CALL_US_ICON', 'EMAIL_US_TITLE',
                    'EMAIL_US_DESC', 'EMAIL_US_ICON', 'EMAIL_US_EMAILS', ),
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ]
 }
