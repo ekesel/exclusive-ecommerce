@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import *
 from constance import config as constance_config
-from api.models import Category, Product, subCategory, CustomerDetail
+from api.models import *
 from .serializers import ProductSerializer, SubCategorySerializer
 from django.db.models import Count
 from rest_framework import status
@@ -14,7 +14,6 @@ from rest_framework.authtoken.models import Token
 # Create your views here.
 
 @api_view(['GET'])
-@permission_classes(())
 def homepageconfigs(request):
     if request.method == 'GET':
         image_banner = constance_config.IMAGE_BANNER
@@ -41,7 +40,6 @@ def homepageconfigs(request):
     return Response({},status=200)
 
 @api_view(['GET'])
-@permission_classes(())
 def login_configs(request):
     if request.method == 'GET':
         support_details = {
@@ -135,5 +133,52 @@ def login(request):
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         else:
             return Response({'error': 'Invalid email/phone or password'}, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+
+@api_view(['GET'])
+def get_wishlist(request):
+    if request.method == 'GET':
+        token = request.GET.get('token')
+        data = {}
+        if token:
+            token_qs = Token.objects.filter(key=token)
+            if token_qs.exists():
+                user = token_qs.last().user
+                if user:
+                    product_ids = list(Wishlist.objects.filter(user=user).values_list('product_id', flat=True))
+                    products = Product.objects.filter(id__in=product_ids)
+                    data = ProductSerializer(products, many=True).data
+                else:
+                    return Response({'error': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(data,status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+@api_view(['GET'])
+def get_just_for_you_products(request):
+    if request.method == 'GET':
+        token = request.GET.get('token')
+        data = {}
+        if token:
+            token_qs = Token.objects.filter(key=token)
+            if token_qs.exists():
+                user = token_qs.last().user
+                if user:
+                    data = ProductSerializer(Product.objects.all()[:5], many=True).data
+                else:
+                    return Response({'error': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(data,status=status.HTTP_200_OK)
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
