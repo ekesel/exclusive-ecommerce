@@ -182,3 +182,37 @@ def get_just_for_you_products(request):
         return Response(data,status=status.HTTP_200_OK)
     else:
         return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+
+@api_view(['POST'])
+def add_to_cart(request):
+    if request.method == 'POST':
+        token = request.data.get('token')
+        product_ids = request.data.get('product_ids')
+        data = {
+            'response': 'successfully added to cart'
+        }
+        if token:
+            token_qs = Token.objects.filter(key=token)
+            if token_qs.exists():
+                user = token_qs.last().user
+                if user:
+                    for product_id in product_ids:
+                        if Cart.objects.filter(user=user, product_id=product_id).exists():
+                            cart_obj = Cart.objects.filter(user=user, product_id=product_id).last()
+                            cart_obj.quantity += 1
+                            cart_obj.save()
+                        else:
+                            Cart.objects.create(user=user, product_id=product_id)
+                        wishlist_obj = Wishlist.objects.filter(product_id=product_id, user=user)
+                        wishlist_obj.delete()
+                else:
+                    return Response({'error': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(data,status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
