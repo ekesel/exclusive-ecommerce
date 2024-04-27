@@ -26,5 +26,26 @@ class SubCategorySerializer(serializers.ModelSerializer):
         fields = ['id','name','image_url']
 
 
+class CartSerializer(serializers.ModelSerializer):
+    subtotal = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+    price = serializers.ReadOnlyField(source='product.price')
+    name = serializers.ReadOnlyField(source='product.name')
+
+    class Meta:
+        model = Cart
+        fields = ['id','price', 'image', 'name', 'quantity', 'subtotal']
+
+    def get_subtotal(self, instance):
+        return int(instance.product.price * instance.quantity)
+    
+    def get_image(self, instance):
+        product = instance.product
+        image_obj = product.product_images.filter(display_image=True).last()
+        if image_obj:
+            return image_obj.image_url
+        return None
+
+
 # class AddCommentSerializer(serializers.Serializer):
 #     comment = serializers.CharField()

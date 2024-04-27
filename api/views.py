@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import *
 from constance import config as constance_config
 from api.models import *
-from .serializers import ProductSerializer, SubCategorySerializer
+from .serializers import *
 from django.db.models import Count
 from rest_framework import status
 from django.contrib.auth.models import User
@@ -206,6 +206,31 @@ def add_to_cart(request):
                             Cart.objects.create(user=user, product_id=product_id)
                         wishlist_obj = Wishlist.objects.filter(product_id=product_id, user=user)
                         wishlist_obj.delete()
+                else:
+                    return Response({'error': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'error': 'Invalid Token'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response(data,status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Method not allowed'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+    
+
+    
+@api_view(['GET'])
+def get_cart_items(request):
+    if request.method == 'GET':
+        token = request.GET.get('token')
+        data = {}
+        if token:
+            token_qs = Token.objects.filter(key=token)
+            if token_qs.exists():
+                user = token_qs.last().user
+                if user:
+                    cart_qs = Cart.objects.filter(user=user)
+                    data = CartSerializer(cart_qs, many=True).data
                 else:
                     return Response({'error': 'Invalid User'}, status=status.HTTP_400_BAD_REQUEST)
             else:
